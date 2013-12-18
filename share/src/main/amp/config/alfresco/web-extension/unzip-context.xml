@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+  <!-- Override WebScript Messages - add slingshot application messages -->
+  <bean id="unzip.custom.resources" class="org.springframework.extensions.surf.util.ResourceBundleBootstrapComponent">
+    <property name="resourceBundles">
+      <list>
+        <value>alfresco.messages.unzip</value>
+      </list>
+    </property>
+  </bean>
+
+  <bean id="unzip.custom.config" class="org.springframework.extensions.config.ConfigBootstrap" init-method="register">
+    <property name="configService" ref="web.config" />
+    <property name="configs">
+      <list>
+        <value>classpath:alfresco/unzip-share-config.xml</value>
+        <value>classpath:alfresco/unzip-form-config.xml</value>
+        <value>classpath:alfresco/web-extension/share-config-unzip.xml</value>
+      </list>
+    </property>
+  </bean>
+  
+  <bean id="evaluator.doclib.mimetype.unzip" parent="evaluator.doclib.action.isMimetype">
+      <property name="mimetypes">
+         <list>
+            <value>application/zip</value>
+         </list>
+      </property>
+   </bean>
+
+</beans>
