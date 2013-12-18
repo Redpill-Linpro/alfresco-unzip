@@ -81,9 +81,17 @@
         },
         failureCallback : {
           fn : function(res) {
+            var message;
+            if (res.json.status.message == undefined || res.json.status.message == null) {
+              message = res.json.message;
+            } else {
+              message = res.json.status.message;
+            }
+
+            
             Alfresco.util.PopupManager.displayMessage({
-              displayTime : 3,
-              text : Alfresco.util.message(res.json.status.message),
+              displayTime : 5,
+              text : Alfresco.util.message(message),
               noEscape : true
             });
             if (timerShowLoadingMessage) {

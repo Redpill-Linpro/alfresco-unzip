@@ -213,6 +213,7 @@ public class UnzipWebScript extends DeclarativeWebScript implements Initializing
    * @return
    */
   public String parseValidFileName(String fileName) {
+    fileName = fileName.trim();
     return fileName;
   }
 
