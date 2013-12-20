@@ -76,17 +76,19 @@ import org.springframework.util.Assert;
  * WebScript for handling "unzip" requests for files
  * 
  * @author Marcus Svensson <marcus.svensson@redpill-linpro.com>
- * 
+ * @author Niklas Ekman <niklas.ekman@redpill-linppro.com>
  */
 public class UnzipWebScript extends DeclarativeWebScript implements InitializingBean {
   private static final Logger LOG = Logger.getLogger(UnzipWebScript.class);
   private NodeService nodeService;
   private FileFolderService fileFolderService;
   private ContentService contentService;
+  private String encoding = DEFAULT_ENCODING;
 
   private static final int BUFFER_SIZE = 16384;
   private static final String TEMP_FILE_PREFIX = "alf";
   private static final String TEMP_FILE_SUFFIX_ZIP = ".zip";
+  private static final String DEFAULT_ENCODING = "UTF-8";
 
   @Override
   protected Map<String, Object> executeImpl(final WebScriptRequest req, final Status status, final Cache cache) {
@@ -165,11 +167,8 @@ public class UnzipWebScript extends DeclarativeWebScript implements Initializing
           try {
             tempFile = TempFileProvider.createTempFile(TEMP_FILE_PREFIX, TEMP_FILE_SUFFIX_ZIP);
             reader.getContent(tempFile);
-            // NOTE: This encoding allows us to workaround bug:
-            // http://bugs.sun.com/bugdatabase/view_bug.do;:WuuT?bug_id=4820807
-            // We also try to use the extra encoding information if present
-            // ALF-2016
-            zipFile = new ZipFile(tempFile, "UTF-8", true);
+
+            zipFile = new ZipFile(tempFile, encoding, true);
 
             // build a temp dir name based on the ID of the noderef we are
             // importing
@@ -286,11 +285,16 @@ public class UnzipWebScript extends DeclarativeWebScript implements Initializing
     this.contentService = contentService;
   }
 
+  public void setEncoding(String encoding) {
+    this.encoding = encoding;
+  }
+
   @Override
   public void afterPropertiesSet() throws Exception {
     Assert.notNull(nodeService, "NodeService must not be null");
     Assert.notNull(fileFolderService, "FileFolderService must not be null");
     Assert.notNull(contentService, "ContentService must not be null");
+    Assert.hasText(encoding, "The encoding must be set");
   }
 
 }
