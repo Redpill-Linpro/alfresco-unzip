@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+  <bean id="webscript.org.redpill_linpro.alfresco.unzip.unzip.post" class="org.redpill_linpro.alfresco.webscripts.unzip.UnzipWebScript" parent="webscript">
+    <property name="nodeService" ref="NodeService" />
+    <property name="contentService" ref="ContentService" />
+    <property name="fileFolderService" ref="FileFolderService" />
+    <property name="encoding" value="${unzip.encoding}" />
+  </bean>
+  
+</beans>

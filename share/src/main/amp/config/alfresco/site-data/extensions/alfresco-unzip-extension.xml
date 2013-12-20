@@ -1,0 +1,41 @@
+<extension>
+  <modules>
+
+    <module>
+      <id>Redpill Linpro Unzip Here Action</id>
+      <auto-deploy>false</auto-deploy>
+      <version>${project.version}</version>
+
+      <configurations>
+        <!-- Document Library Custom Code config section -->
+        <config evaluator="string-compare" condition="DocLibCustom">
+          <dependencies>
+            <css src="/rplp/unzip/unzip-here.css" />
+            <js src="/rplp/unzip/unzip-here.js" />
+          </dependencies>
+        </config>
+
+        <!-- Document Library Actions config section -->
+        <config evaluator="string-compare" condition="DocLibActions">
+          <actions>
+            <action id="rplp-unzip-here-action" type="javascript" label="actions.label.unzip-here" icon="unzip-here">
+              <param name="function">onUnzipHere</param>
+              <evaluator>evaluator.doclib.mimetype.unzip</evaluator>
+            </action>
+          </actions>
+
+          <actionGroups>
+            <actionGroup id="document-browse">
+              <action index="400" id="rplp-unzip-here-action" />
+            </actionGroup>
+
+            <actionGroup id="document-details">
+              <action index="400" id="rplp-unzip-here-action" />
+            </actionGroup>
+          </actionGroups>
+        </config>
+      </configurations>
+    </module>
+
+  </modules>
+</extension>

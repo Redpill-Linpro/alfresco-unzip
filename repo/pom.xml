@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.redpill-linpro.alfresco</groupId>
+    <artifactId>alfresco-unzip</artifactId>
+    <version>1.0.0</version>
+  </parent>
+
+  <artifactId>alfresco-unzip-repo</artifactId>
+  <packaging>amp</packaging>
+  <name>Alfresco Unzip Repository Module</name>
+
+  <properties>
+    <module.id>unzip-repo</module.id>
+    <!-- This property allow to switch Repo AMP vs Share AMP. Set alfresco.client.war=share to run this AMP against Share -->
+    <alfresco.client.war>alfresco</alfresco.client.war>
+    <tomcat.home>${tomcat.repo.home}</tomcat.home>
+    <tomcat.port>${tomcat.repo.port}</tomcat.port>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>${alfresco.groupId}</groupId>
+      <artifactId>alfresco-repository</artifactId>
+    </dependency>
+  </dependencies>
+
+</project>
