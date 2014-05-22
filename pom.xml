@@ -7,20 +7,19 @@
   <parent>
     <groupId>com.redpill-linpro.alfresco</groupId>
     <artifactId>alfresco-base</artifactId>
-    <version>1.1.1.2</version>
+    <version>1.1.1.3</version>
   </parent>
-
 
   <groupId>org.redpill-linpro.alfresco</groupId>
   <artifactId>alfresco-unzip</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
   <name>Base project for Alfresco Unzip Module</name>
   <description>Base project for Alfresco Unzip Module</description>
   <packaging>pom</packaging>
 
   <properties>
     <alfresco.groupId>org.alfresco.enterprise</alfresco.groupId>
-    <alfresco.version>4.1.7</alfresco.version>
+    <alfresco.version>4.1.8</alfresco.version>
   </properties>
 
   <modules>
