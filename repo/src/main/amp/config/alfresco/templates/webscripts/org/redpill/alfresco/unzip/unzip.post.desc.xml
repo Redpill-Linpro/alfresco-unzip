@@ -4,7 +4,7 @@
   Takes a source and a target nodeRef and processes the request.
   ]]>
   </description>
-  <url>/org/redpill_linpro/unzip?source={source}&amp;target={target}</url>
+  <url>/org/redpill/unzip?source={source}&amp;target={target}</url>
   <format default="json">argument</format>
   <authentication>user</authentication>
   <transaction>required</transaction>

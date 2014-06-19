@@ -58,7 +58,7 @@
         }
       };
       Alfresco.util.Ajax.jsonPost({
-        url : Alfresco.constants.PROXY_URI + "org/redpill_linpro/unzip?source=" + sourceNodeRef + "&target=" + targetNodeRef,
+        url : Alfresco.constants.PROXY_URI + "org/redpill/unzip?source=" + sourceNodeRef + "&target=" + targetNodeRef,
         successCallback : {
           fn : function(res) {
             Alfresco.util.PopupManager.displayMessage({

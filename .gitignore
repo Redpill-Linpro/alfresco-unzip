@@ -11,3 +11,5 @@ target
 *.amp
 
 .DS_Store
+
+/repo/alf_data_dev/
