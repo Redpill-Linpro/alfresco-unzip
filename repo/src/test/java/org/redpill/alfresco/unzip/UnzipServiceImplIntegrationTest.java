@@ -1,5 +1,7 @@
 package org.redpill.alfresco.unzip;
 
+import java.util.List;
+
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
@@ -9,7 +11,6 @@ import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
 import org.junit.Assert;
 import org.junit.Test;
-import org.redpill.alfresco.unzip.UnzipService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -37,18 +38,24 @@ public class UnzipServiceImplIntegrationTest extends AbstractRepoIntegrationTest
 
           NodeRef documentLibrary = _siteService.getContainer(site.getShortName(), SiteService.DOCUMENT_LIBRARY);
 
-          _unzipService.importZip(zipFile.getNodeRef(), documentLibrary);
-
+          List<NodeRef> result = _unzipService.importZip(zipFile.getNodeRef(), documentLibrary);
+          
           NodeRef zipFileNodeRef = _nodeService.getChildByName(documentLibrary, ContentModel.ASSOC_CONTAINS, filename);
           NodeRef file1 = _nodeService.getChildByName(documentLibrary, ContentModel.ASSOC_CONTAINS, "file1.txt");
           NodeRef file2 = _nodeService.getChildByName(documentLibrary, ContentModel.ASSOC_CONTAINS, "file2.txt");
           NodeRef folder1 = _nodeService.getChildByName(documentLibrary, ContentModel.ASSOC_CONTAINS, "folder1");
+
+          for (NodeRef document : result) {
+            Assert.assertNotEquals(zipFileNodeRef.toString(), document.toString());
+            Assert.assertNotEquals(folder1.toString(), document.toString());
+          }
 
           Assert.assertTrue(zipFile.getNodeRef().equals(zipFileNodeRef));
           Assert.assertNotNull(zipFileNodeRef);
           Assert.assertNotNull(file1);
           Assert.assertNotNull(file2);
           Assert.assertNotNull(folder1);
+          Assert.assertEquals(5, result.size());
         } finally {
           deleteSite(site);
         }

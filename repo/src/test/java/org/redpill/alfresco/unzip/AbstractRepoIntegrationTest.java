@@ -1,9 +1,10 @@
 package org.redpill.alfresco.unzip;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.io.InputStream;
+import java.util.List;
+import java.util.Properties;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
@@ -12,6 +13,7 @@ import org.alfresco.repo.security.authentication.AuthenticationComponent;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.site.SiteModel;
 import org.alfresco.repo.transaction.RetryingTransactionHelper;
+import org.alfresco.repo.transaction.RetryingTransactionHelper.RetryingTransactionCallback;
 import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.model.FileInfo;
 import org.alfresco.service.cmr.repository.ContentService;
@@ -23,6 +25,7 @@ import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.service.cmr.site.SiteVisibility;
+import org.alfresco.service.cmr.workflow.WorkflowService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.transaction.TransactionService;
@@ -93,6 +96,14 @@ public abstract class AbstractRepoIntegrationTest {
   @Qualifier("ContentService")
   protected ContentService _contentService;
 
+  @Autowired
+  @Qualifier("WorkflowService")
+  protected WorkflowService _workflowService;
+
+  @Autowired
+  @Qualifier("global-properties")
+  protected Properties _properties;
+
   @Before
   public void setup() {
     _transactionHelper = _transactionService.getRetryingTransactionHelper();
@@ -111,6 +122,7 @@ public abstract class AbstractRepoIntegrationTest {
       properties.put(ContentModel.PROP_USERNAME, userId);
       properties.put(ContentModel.PROP_FIRSTNAME, userId);
       properties.put(ContentModel.PROP_LASTNAME, "Test");
+      properties.put(ContentModel.PROP_EMAIL, _properties.getProperty("mail.to.default"));
 
       return _personService.createPerson(properties);
     } else {
@@ -174,6 +186,10 @@ public abstract class AbstractRepoIntegrationTest {
     }, false, true);
   }
 
+  protected SiteInfo createSite() {
+    return createSite("site-dashboard");
+  }
+
   protected void deleteSite(final SiteInfo siteInfo) {
     _transactionHelper.doInTransaction(new RetryingTransactionHelper.RetryingTransactionCallback<Void>() {
 
@@ -192,43 +208,60 @@ public abstract class AbstractRepoIntegrationTest {
   }
 
   protected FileInfo uploadDocument(SiteInfo site, String filename) {
-    return uploadDocument(site, filename, null, null, null);
+    return uploadDocument(site, filename, null);
   }
 
-  protected FileInfo uploadDocument(SiteInfo site, String filename, String name) {
-    return uploadDocument(site, filename, name, null, null);
+  protected FileInfo uploadDocument(SiteInfo site, String filename, List<String> folders) {
+    return uploadDocument(site, filename, folders, null);
   }
 
-  protected FileInfo uploadDocument(SiteInfo site, String filename, String name, NodeRef parentNodeRef) {
-    return uploadDocument(site, filename, name, parentNodeRef, null);
+  protected FileInfo uploadDocument(SiteInfo site, String filename, List<String> folders, String name) {
+    return uploadDocument(site, filename, folders, name, null);
   }
 
-  protected FileInfo uploadDocument(SiteInfo site, String filename, String name, NodeRef parentNodeRef, String type) {
-    String finalName = StringUtils.isNotEmpty(name) ? name : FilenameUtils.getName(filename);
+  protected FileInfo uploadDocument(SiteInfo site, String filename, List<String> folders, String name, NodeRef parentNodeRef) {
+    return uploadDocument(site, filename, folders, name, parentNodeRef, null);
+  }
 
-    NodeRef documentLibrary = _siteService.getContainer(site.getShortName(), SiteService.DOCUMENT_LIBRARY);
+  protected FileInfo uploadDocument(final SiteInfo site, final String filename, final List<String> folders, final String name, final NodeRef parentNodeRef, final String type) {
+    return _transactionHelper.doInTransaction(new RetryingTransactionCallback<FileInfo>() {
 
-    NodeRef finalParentNodeRef = parentNodeRef != null ? parentNodeRef : documentLibrary;
+      @Override
+      public FileInfo execute() throws Throwable {
+        String finalName = StringUtils.isNotEmpty(name) ? name : FilenameUtils.getName(filename);
 
-    FileInfo fileInfo = _fileFolderService.create(finalParentNodeRef, finalName, type == null ? ContentModel.TYPE_CONTENT : createQName(type));
+        NodeRef documentLibrary = _siteService.getContainer(site.getShortName(), SiteService.DOCUMENT_LIBRARY);
 
-    ContentWriter writer = _contentService.getWriter(fileInfo.getNodeRef(), ContentModel.PROP_CONTENT, true);
+        NodeRef finalParentNodeRef = parentNodeRef != null ? parentNodeRef : documentLibrary;
 
-    writer.guessEncoding();
+        if (folders != null) {
+          for (String folder : folders) {
+            FileInfo folderInfo = _fileFolderService.create(finalParentNodeRef, folder, ContentModel.TYPE_FOLDER);
+            finalParentNodeRef = folderInfo.getNodeRef();
+          }
+        }
 
-    writer.guessMimetype(filename);
+        FileInfo fileInfo = _fileFolderService.create(finalParentNodeRef, finalName, type == null ? ContentModel.TYPE_CONTENT : createQName(type));
 
-    InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(filename);
+        ContentWriter writer = _contentService.getWriter(fileInfo.getNodeRef(), ContentModel.PROP_CONTENT, true);
 
-    try {
-      writer.putContent(inputStream);
-    } catch (Exception ex) {
-      throw new RuntimeException(ex);
-    } finally {
-      IOUtils.closeQuietly(inputStream);
-    }
+        writer.guessEncoding();
 
-    return fileInfo;
+        writer.guessMimetype(filename);
+
+        InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(filename);
+
+        try {
+          writer.putContent(inputStream);
+        } catch (Exception ex) {
+          throw new RuntimeException(ex);
+        } finally {
+          IOUtils.closeQuietly(inputStream);
+        }
+
+        return fileInfo;
+      }
+    }, false, true);
   }
 
   protected QName createQName(String s) {

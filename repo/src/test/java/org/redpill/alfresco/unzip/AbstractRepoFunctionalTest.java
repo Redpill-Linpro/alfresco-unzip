@@ -13,7 +13,7 @@ public abstract class AbstractRepoFunctionalTest {
 
   public static final String BASE_URI = "http://localhost:8080/alfresco/service";
 
-  protected void unzipDocument(String zipFileNodeRef, String documentLibraryNodeRef) {
+  protected void unzipDocument(String zipFileNodeRef, String documentLibraryNodeRef, boolean async) {
     RestAssured.requestContentType(ContentType.JSON);
     RestAssured.responseContentType(ContentType.JSON);
     
@@ -21,9 +21,10 @@ public abstract class AbstractRepoFunctionalTest {
       .baseUri(BASE_URI)
       .pathParameter("source", zipFileNodeRef)
       .pathParameter("target", documentLibraryNodeRef)
+      .pathParameter("async", async ? "true" : "false")
       .expect()
       .contentType(ContentType.JSON).and().statusCode(200)
-      .when().post("/org/redpill/unzip?source={source}&target={target}");
+      .when().post("/org/redpill/unzip?source={source}&target={target}&async={async}");
   }
 
   protected String uploadDocument(String filename, String site) {

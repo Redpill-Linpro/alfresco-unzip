@@ -24,7 +24,7 @@ public class UnzipWebScriptFunctionalTest extends AbstractRepoFunctionalTest {
   }
 
   @Test
-  public void testUnzip() throws IOException {
+  public void testUnzipSync() throws IOException {
     String site = "site_name_" + System.currentTimeMillis();
     String filename = "documents.zip";
 
@@ -35,7 +35,32 @@ public class UnzipWebScriptFunctionalTest extends AbstractRepoFunctionalTest {
 
       String documentLibraryNodeRef = getDocumentLibraryNodeRef(site);
 
-      unzipDocument(zipFileNodeRef, documentLibraryNodeRef);
+      unzipDocument(zipFileNodeRef, documentLibraryNodeRef, false);
+
+      assertNodeExists(zipFileNodeRef);
+      assertNodeExists(documentLibraryNodeRef);
+      
+      assertNodeExists("file1.txt", documentLibraryNodeRef);
+      assertNodeExists("file2.txt", documentLibraryNodeRef);
+      assertNodeExists("folder1", documentLibraryNodeRef);
+    } finally {
+      deleteSite(site);
+    }
+  }
+
+  @Test
+  public void testUnzipAsync() throws IOException {
+    String site = "site_name_" + System.currentTimeMillis();
+    String filename = "documents.zip";
+
+    createSite(site);
+
+    try {
+      String zipFileNodeRef = uploadDocument(filename, site);
+
+      String documentLibraryNodeRef = getDocumentLibraryNodeRef(site);
+
+      unzipDocument(zipFileNodeRef, documentLibraryNodeRef, true);
 
       assertNodeExists(zipFileNodeRef);
       assertNodeExists(documentLibraryNodeRef);

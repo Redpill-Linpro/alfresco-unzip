@@ -22,6 +22,7 @@
     <alfresco.version>4.1.8</alfresco.version>
     <java.source.version>1.6</java.source.version>
     <java.target.version>1.6</java.target.version>
+    <maven.tomcat.port>${tomcat.port}</maven.tomcat.port>
   </properties>
 
   <modules>

@@ -43,6 +43,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.alfresco.error.AlfrescoRuntimeException;
+import org.alfresco.service.cmr.action.Action;
+import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.model.FileExistsException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -69,16 +71,19 @@ public class UnzipWebScript extends DeclarativeWebScript implements Initializing
 
   private UnzipService _unzipService;
 
+  private ActionService _actionService;
+
   @Override
   protected Map<String, Object> executeImpl(final WebScriptRequest req, final Status status, final Cache cache) {
     Map<String, Object> result = new HashMap<String, Object>();
-    
+
     if (LOG.isTraceEnabled()) {
       LOG.trace("Entering executeImpl...");
     }
 
     String source = req.getParameter("source");
     String target = req.getParameter("target");
+    boolean async = "true".equalsIgnoreCase(req.getParameter("async"));
 
     if (LOG.isTraceEnabled()) {
       LOG.trace("Source: " + source + ", Target: " + target);
@@ -115,7 +120,13 @@ public class UnzipWebScript extends DeclarativeWebScript implements Initializing
       return result;
     } else {
       try {
-        _unzipService.importZip(sourceNodeRef, targetNodeRef);
+        Action unzipAction = _actionService.createAction(UnzipActionExecutor.NAME);
+
+        unzipAction.setExecuteAsynchronously(async);
+        unzipAction.setTrackStatus(true);
+        unzipAction.setParameterValue(UnzipActionExecutor.PARAM_DESTINATION_FOLDER, targetNodeRef);
+
+        _actionService.executeAction(unzipAction, sourceNodeRef);
       } catch (AlfrescoRuntimeException re) {
         Throwable cause = re.getCause();
         if (cause instanceof FileExistsException) {
@@ -143,9 +154,14 @@ public class UnzipWebScript extends DeclarativeWebScript implements Initializing
     _unzipService = unzipService;
   }
 
+  public void setActionService(ActionService actionService) {
+    _actionService = actionService;
+  }
+
   @Override
   public void afterPropertiesSet() throws Exception {
     ParameterCheck.mandatory("unzipService", _unzipService);
+    ParameterCheck.mandatory("actionService", _actionService);
     Assert.notNull(_nodeService, "NodeService must not be null");
   }
 

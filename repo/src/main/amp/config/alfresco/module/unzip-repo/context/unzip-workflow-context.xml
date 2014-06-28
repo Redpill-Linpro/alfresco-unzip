@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+  <bean id="rl.unzip-repo.workflowBootstrap" parent="workflowDeployer">
+    <property name="workflowDefinitions">
+      <list>
+        <props>
+          <prop key="engineId">activiti</prop>
+          <prop key="location">alfresco/module/unzip-repo/context/workflows/unzipDocument.bpmn</prop>
+          <prop key="mimetype">text/xml</prop>
+          <prop key="redeploy">false</prop>
+        </props>
+      </list>
+    </property>
+    <property name="models">
+      <list>
+        <value>alfresco/module/unzip-repo/context/model/unzip-workflow-model.xml</value>
+      </list>
+    </property>
+  </bean>
+
+  <bean id="rl.unzip-repo.unzipDocumentServiceTask" class="org.redpill.alfresco.unzip.UnzipDocumentServiceTask" parent="baseJavaDelegate" depends-on="activitiBeanRegistry" />
+
+</beans>

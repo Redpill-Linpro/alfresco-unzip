@@ -1,12 +1,14 @@
 package org.redpill.alfresco.unzip;
 
-import org.alfresco.error.AlfrescoRuntimeException;
+import java.util.List;
+
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.model.FileInfo;
+import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.site.SiteInfo;
@@ -24,7 +26,7 @@ public class UnzipActionExecutorIntegrationTest extends AbstractRepoIntegrationT
   @Qualifier("ActionService")
   protected ActionService _actionService;
 
-  @Test(expected = AlfrescoRuntimeException.class)
+  @Test(expected = InvalidNodeRefException.class)
   public void testFailed1() {
 
     AuthenticationUtil.runAs(new RunAsWork<Void>() {
@@ -54,7 +56,7 @@ public class UnzipActionExecutorIntegrationTest extends AbstractRepoIntegrationT
 
   }
 
-  @Test(expected = AlfrescoRuntimeException.class)
+  @Test(expected = IllegalArgumentException.class)
   public void testFailed2() {
 
     AuthenticationUtil.runAs(new RunAsWork<Void>() {
@@ -109,17 +111,26 @@ public class UnzipActionExecutorIntegrationTest extends AbstractRepoIntegrationT
             Thread.sleep(1000);
             System.out.println("Sleeping . . . (" + action.getExecutionStatus() + ")");
           }
+          
+          @SuppressWarnings("unchecked")
+          List<NodeRef> result = (List<NodeRef>) action.getParameterValue(UnzipActionExecutor.PARAM_RESULT);
 
           NodeRef zipFileNodeRef = _nodeService.getChildByName(documentLibrary, ContentModel.ASSOC_CONTAINS, filename);
           NodeRef file1 = _nodeService.getChildByName(documentLibrary, ContentModel.ASSOC_CONTAINS, "file1.txt");
           NodeRef file2 = _nodeService.getChildByName(documentLibrary, ContentModel.ASSOC_CONTAINS, "file2.txt");
           NodeRef folder1 = _nodeService.getChildByName(documentLibrary, ContentModel.ASSOC_CONTAINS, "folder1");
 
+          for (NodeRef document : result) {
+            Assert.assertNotEquals(zipFileNodeRef.toString(), document.toString());
+            Assert.assertNotEquals(folder1.toString(), document.toString());
+          }
+
           Assert.assertTrue(zipFile.getNodeRef().equals(zipFileNodeRef));
           Assert.assertNotNull(zipFileNodeRef);
           Assert.assertNotNull(file1);
           Assert.assertNotNull(file2);
           Assert.assertNotNull(folder1);
+          Assert.assertEquals(5, result.size());
         } finally {
           deleteSite(site);
         }

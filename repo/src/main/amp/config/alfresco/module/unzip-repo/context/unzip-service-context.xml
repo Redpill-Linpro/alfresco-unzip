@@ -1,0 +1,66 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+  <!-- This is a helper bean for getting hold of the current application context and making it available with a static method -->
+  <bean id="rl.unzip-repo.applicationContextHolder" class="org.redpill.alfresco.unzip.ApplicationContextHolder" />
+
+  <bean id="rl.unzipService" class="org.redpill.alfresco.unzip.UnzipServiceImpl">
+    <property name="contentService" ref="ContentService" />
+    <property name="fileFolderService" ref="FileFolderService" />
+    <property name="nodeService" ref="NodeService" />
+    <property name="encoding" value="${unzip.encoding}" />
+  </bean>
+
+  <bean id="unzip" class="org.redpill.alfresco.unzip.UnzipActionExecutor" parent="action-executer">
+    <property name="nodeService" ref="NodeService" />
+    <property name="unzipService" ref="rl.unzipService" />
+    <property name="actionService" ref="ActionService" />
+    <property name="fileFolderService" ref="FileFolderService" />
+    <property name="namespaceService" ref="NamespaceService" />
+    <property name="permissionService" ref="PermissionService" />
+    <property name="personService" ref="PersonService" />
+    <property name="repoAdminService" ref="RepoAdminService" />
+    <property name="searchService" ref="SearchService" />
+    <property name="siteService" ref="SiteService" />
+    <property name="transactionService" ref="transactionService" />
+  </bean>
+
+  <bean id="webscript.org.redpill.alfresco.unzip.unzip.post" class="org.redpill.alfresco.unzip.UnzipWebScript" parent="webscript">
+    <property name="nodeService" ref="NodeService" />
+    <property name="unzipService" ref="rl.unzipService" />
+    <property name="actionService" ref="ActionService" />
+  </bean>
+
+  <bean id="rl.unzip-repo.unzipSuccessEmailTemplateLocation" class="org.alfresco.repo.dictionary.RepositoryLocation">
+    <!-- other properties will be defaulted, but can be overridden here -->
+    <property name="path">
+      <value>/app:company_home/app:dictionary/app:email_templates/cm:unzip/cm:unzip-success-email.ftl</value>
+    </property>
+  </bean>
+
+  <bean id="rl.unzip-repo.unzipFailureEmailTemplateLocation" class="org.alfresco.repo.dictionary.RepositoryLocation">
+    <!-- other properties will be defaulted, but can be overridden here -->
+    <property name="path">
+      <value>/app:company_home/app:dictionary/app:email_templates/cm:unzip/cm:unzip-failure-email.ftl</value>
+    </property>
+  </bean>
+
+  <bean id="rl.unzip-repo.resourceBundles" class="org.alfresco.i18n.ResourceBundleBootstrapComponent">
+    <property name="resourceBundles">
+      <list>
+        <value>alfresco.module.unzip-repo.context.messages.unzip</value>
+      </list>
+    </property>
+  </bean>
+
+  <!-- Registration of new model -->
+  <bean id="rl.unzip-repo.dictionaryBootstrap" parent="dictionaryModelBootstrap" depends-on="dictionaryBootstrap">
+    <property name="models">
+      <list>
+        <value>alfresco/module/unzip-repo/context/model/unzip-model.xml</value>
+      </list>
+    </property>
+  </bean>
+
+</beans>

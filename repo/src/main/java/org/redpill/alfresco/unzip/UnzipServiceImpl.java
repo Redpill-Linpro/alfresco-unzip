@@ -7,7 +7,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.alfresco.error.AlfrescoRuntimeException;
@@ -50,20 +52,20 @@ public class UnzipServiceImpl implements UnzipService, InitializingBean {
   private FileFolderService _fileFolderService;
 
   @Override
-  public void importZip(NodeRef zipFileNodeRef, NodeRef destinationFolderNodeRef) {
+  public List<NodeRef> importZip(NodeRef zipFileNodeRef, NodeRef destinationFolderNodeRef) {
     if (!_nodeService.exists(zipFileNodeRef)) {
-      return;
+      return null;
     }
 
     // The node being passed in should be an Alfresco content package
     ContentReader reader = _contentService.getReader(zipFileNodeRef, ContentModel.PROP_CONTENT);
 
     if (reader == null) {
-      return;
+      return null;
     }
 
     if (!MimetypeMap.MIMETYPE_ZIP.equals(reader.getMimetype())) {
-      return;
+      return null;
     }
 
     // perform an import of a standard ZIP file
@@ -92,7 +94,9 @@ public class UnzipServiceImpl implements UnzipService, InitializingBean {
         // to remove the need to expand to the filesystem first?
         ImporterActionExecuter.extractFile(zipFile, tempDir.getPath());
 
-        importDirectory(tempDir.getPath(), destinationFolderNodeRef);
+        List<NodeRef> importedNodes = importDirectory(tempDir.getPath(), destinationFolderNodeRef);
+        
+        return importedNodes;
       } finally {
         ImporterActionExecuter.deleteDir(tempDir);
       }
@@ -116,11 +120,13 @@ public class UnzipServiceImpl implements UnzipService, InitializingBean {
    * @param root
    *          The root node to import into
    */
-  protected void importDirectory(String dir, NodeRef root) {
-    importDirectory(dir, root, "");
+  protected List<NodeRef> importDirectory(String dir, NodeRef root) {
+    return importDirectory(dir, root, "");
   }
 
-  protected void importDirectory(String dir, NodeRef root, String displayPath) {
+  protected List<NodeRef> importDirectory(String dir, NodeRef root, String displayPath) {
+    List<NodeRef> result = new ArrayList<NodeRef>();
+    
     File topdir = new File(dir);
 
     for (File file : topdir.listFiles()) {
@@ -136,6 +142,8 @@ public class UnzipServiceImpl implements UnzipService, InitializingBean {
           FileInfo fileInfo = _fileFolderService.create(root, fileName, ContentModel.TYPE_CONTENT);
 
           NodeRef fileRef = fileInfo.getNodeRef();
+          
+          result.add(fileRef);
 
           // add titled aspect for the read/edit properties screens
           Map<QName, Serializable> titledProps = new HashMap<QName, Serializable>(1, 1.0f);
@@ -155,10 +163,14 @@ public class UnzipServiceImpl implements UnzipService, InitializingBean {
         } else {
           // create a folder based on the folder name
           FileInfo folderInfo = this._fileFolderService.create(root, fileName, ContentModel.TYPE_FOLDER);
+          
           NodeRef folderRef = folderInfo.getNodeRef();
 
-          importDirectory(file.getPath(), folderRef, displayPath + "/" + fileName);
+          List<NodeRef> imported = importDirectory(file.getPath(), folderRef, displayPath + "/" + fileName);
+          
+          result.addAll(imported);
         }
+        
       } catch (FileNotFoundException e) {
         // TODO: add failed file info to status message?
         throw new AlfrescoRuntimeException("Failed to process ZIP file.", e);
@@ -167,6 +179,8 @@ public class UnzipServiceImpl implements UnzipService, InitializingBean {
         throw new AlfrescoRuntimeException("Failed to process ZIP file.", e);
       }
     }
+    
+    return result;
   }
 
   /**
