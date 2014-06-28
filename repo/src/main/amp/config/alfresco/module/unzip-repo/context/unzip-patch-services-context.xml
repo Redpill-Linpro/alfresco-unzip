@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+  <bean id="rl.unzip-repo.patch.unzipEmailTemplate" class="org.alfresco.repo.admin.patch.impl.GenericBootstrapPatch" parent="basePatch">
+    <property name="id">
+      <value>patch.unzipEmailTemplate</value>
+    </property>
+    <property name="description">
+      <value>patch.unzipEmailTemplate.description</value>
+    </property>
+    <property name="fixesFromSchema">
+      <value>0</value>
+    </property>
+    <property name="fixesToSchema">
+      <value>0</value>
+    </property>
+    <property name="targetSchema">
+      <value>1</value>
+    </property>
+    <property name="force" value="true" />
+    <property name="importerBootstrap">
+      <ref bean="spacesBootstrap" />
+    </property>
+    <property name="checkPath">
+      <value>/${spaces.company_home.childname}/${spaces.dictionary.childname}/${spaces.templates.email.childname}/${spaces.templates.email.unzip.childname}</value>
+    </property>
+    <property name="bootstrapView">
+      <props>
+        <prop key="path">/${spaces.company_home.childname}/${spaces.dictionary.childname}/${spaces.templates.email.childname}</prop>
+        <prop key="location">alfresco/templates/unzip-email-templates.xml</prop>
+        <prop key="messages">alfresco/module/unzip-repo/context/messages/bootstrap-unzip</prop>
+      </props>
+    </property>
+  </bean>
+
+</beans>

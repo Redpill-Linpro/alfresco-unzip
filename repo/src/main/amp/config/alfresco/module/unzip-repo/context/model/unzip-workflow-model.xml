@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<model name="unzipw:unzipWorkflowModel" xmlns="http://www.alfresco.org/model/dictionary/1.0">
+
+  <description>Unzip Workflow Data Model</description>
+  <author>Redpill Linpro AB</author>
+  <version>1.0.0</version>
+
+  <imports>
+    <!-- Import Alfresco Dictionary Definitions -->
+    <import uri="http://www.alfresco.org/model/dictionary/1.0" prefix="d" />
+    <!-- Import Alfresco System Definitions -->
+    <import uri="http://www.alfresco.org/model/system/1.0" prefix="sys" />
+    <!-- Import Alfresco Content Domain Model Definitions -->
+    <import uri="http://www.alfresco.org/model/content/1.0" prefix="cm" />
+    <!-- Import User Model Definitions -->
+    <import uri="http://www.alfresco.org/model/user/1.0" prefix="usr" />
+    <import uri="http://www.alfresco.org/model/bpm/1.0" prefix="bpm" />
+    <import uri="http://www.alfresco.org/model/workflow/1.0" prefix="wf" />
+    <import uri="http://www.alfresco.org/model/site/1.0" prefix="st" />
+  </imports>
+
+  <namespaces>
+    <namespace uri="http://www.redpill-linpro.org/unzip/model/workflow/1.0" prefix="unzipw" />
+  </namespaces>
+
+  <aspects>
+    <aspect name="unzipw:unzippingFinished">
+      <associations>
+        <association name="unzipw:unzippedDocument">
+          <source>
+            <mandatory>false</mandatory>
+            <many>true</many>
+          </source>
+          <target>
+            <class>bpm:package</class>
+            <mandatory>false</mandatory>
+            <many>false</many>
+          </target>
+        </association>
+      </associations>
+    </aspect>
+  </aspects>
+</model>

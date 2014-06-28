@@ -3,7 +3,7 @@
 
     <module>
       <id>Redpill Linpro Unzip Here Action</id>
-      <auto-deploy>false</auto-deploy>
+      <auto-deploy>true</auto-deploy>
       <version>${project.version}</version>
 
       <configurations>

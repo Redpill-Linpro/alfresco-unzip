@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<model name="unzip:unzipModel" xmlns="http://www.alfresco.org/model/dictionary/1.0">
+
+  <description>Unzip Data Model</description>
+  <author>Redpill Linpro AB</author>
+  <version>1.0.0</version>
+
+  <imports>
+    <!-- Import Alfresco Dictionary Definitions -->
+    <import uri="http://www.alfresco.org/model/dictionary/1.0" prefix="d" />
+    <!-- Import Alfresco System Definitions -->
+    <import uri="http://www.alfresco.org/model/system/1.0" prefix="sys" />
+    <!-- Import Alfresco Content Domain Model Definitions -->
+    <import uri="http://www.alfresco.org/model/content/1.0" prefix="cm" />
+    <!-- Import User Model Definitions -->
+    <import uri="http://www.alfresco.org/model/user/1.0" prefix="usr" />
+    <import uri="http://www.alfresco.org/model/site/1.0" prefix="st" />
+  </imports>
+
+  <namespaces>
+    <namespace uri="http://www.redpill-linpro.org/unzip/model/core/1.0" prefix="unzip" />
+  </namespaces>
+
+  <aspects>
+    <aspect name="unzip:unzippedfrom">
+      <associations>
+        <association name="unzip:zipdocument">
+          <source>
+            <mandatory>false</mandatory>
+            <many>true</many>
+          </source>
+          <target>
+            <class>cm:cmobject</class>
+            <mandatory>false</mandatory>
+            <many>false</many>
+          </target>
+        </association>
+      </associations>
+    </aspect>
+  </aspects>
+</model>
