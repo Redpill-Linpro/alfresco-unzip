@@ -15,6 +15,7 @@ import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
 import org.junit.Assert;
 import org.junit.Test;
+import org.redpill.alfresco.test.AbstractRepoIntegrationTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -141,4 +142,5 @@ public class UnzipActionExecutorIntegrationTest extends AbstractRepoIntegrationT
     }, ADMIN_USER_NAME);
 
   }
+
 }
