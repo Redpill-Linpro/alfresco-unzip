@@ -2,6 +2,8 @@ package org.redpill.alfresco.unzip;
 
 import static com.jayway.restassured.RestAssured.*;
 
+import org.redpill.alfresco.test.AbstractRepoFunctionalTest;
+
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.http.ContentType;
 

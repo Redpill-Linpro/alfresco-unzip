@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
+import org.redpill.alfresco.test.AbstractRepoFunctionalTest;
 
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.http.ContentType;

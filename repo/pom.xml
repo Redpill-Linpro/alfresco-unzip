@@ -24,11 +24,13 @@
     <dependency>
       <groupId>${alfresco.groupId}</groupId>
       <artifactId>alfresco-repository</artifactId>
+      <scope>provided</scope>
     </dependency>
+    
     <dependency>
       <groupId>org.redpill-linpro.alfresco</groupId>
       <artifactId>alfresco-test-repo</artifactId>
-      <version>1.0.0</version>
+      <version>1.0.0-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

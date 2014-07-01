@@ -20,22 +20,22 @@ import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.workflow.WorkflowDefinition;
 import org.alfresco.service.cmr.workflow.WorkflowPath;
 import org.alfresco.service.namespace.QName;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
+import org.redpill.alfresco.test.AbstractRepoIntegrationTest;
 import org.springframework.extensions.surf.util.I18NUtil;
 
 public class UnzipDocumentWorkflowIntegrationTest extends AbstractRepoIntegrationTest {
 
-  private SiteInfo site;
-  private String siteManagerUser;
-
-  private String siteConsumerUser;
-
   private static final String PROCESS_DEFINITION_ID = "activiti$unzipDocument";
 
-  @Before
-  public void setUp() {
+  private static SiteInfo site;
+  private static String siteManagerUser;
+  private static String siteConsumerUser;
+  
+  @Override
+  public void beforeClassSetup() {
+    super.beforeClassSetup();
+    
     Locale locale = new Locale("sv");
     I18NUtil.setLocale(locale);
 
@@ -60,9 +60,9 @@ public class UnzipDocumentWorkflowIntegrationTest extends AbstractRepoIntegratio
     // Run the tests as this user
     _authenticationComponent.setCurrentUser(siteManagerUser);
   }
-
-  @After
-  public void tearDown() {
+  
+  @Override
+  public void afterClassSetup() {
     _authenticationComponent.setCurrentUser(AuthenticationUtil.getAdminUserName());
 
     deleteSite(site);
@@ -112,11 +112,11 @@ public class UnzipDocumentWorkflowIntegrationTest extends AbstractRepoIntegratio
 
     // start the workflow
     start(workflowProps);
-    
+
     Thread.sleep(5000);
 
     List<AssociationRef> list = _nodeService.getSourceAssocs(zipFile.getNodeRef(), UnzipModel.ASSOC_ZIP_DOCUMENT);
-    
+
     assertEquals(5, list.size());
   }
 
@@ -139,7 +139,7 @@ public class UnzipDocumentWorkflowIntegrationTest extends AbstractRepoIntegratio
     _nodeService.addChild(workflowPackage, zipFile.getNodeRef(), WorkflowModel.ASSOC_PACKAGE_CONTAINS, childAssoc.getQName());
 
     start(workflowProps);
-    
+
     Thread.sleep(5000);
 
     List<AssociationRef> list = _nodeService.getSourceAssocs(zipFile.getNodeRef(), UnzipModel.ASSOC_ZIP_DOCUMENT);
