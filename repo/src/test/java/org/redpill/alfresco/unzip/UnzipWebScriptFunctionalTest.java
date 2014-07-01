@@ -11,7 +11,7 @@ import org.junit.Test;
 
 import com.jayway.restassured.RestAssured;
 
-public class UnzipWebScriptFunctionalTest extends AbstractRepoFunctionalTest {
+public class UnzipWebScriptFunctionalTest extends AbstractUnzipFunctionalTest {
 
   @Before
   public void setUp() {
