@@ -4,7 +4,6 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -28,6 +27,7 @@ import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ParameterCheck;
 import org.alfresco.util.TempFileProvider;
 import org.apache.commons.compress.archivers.zip.ZipFile;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
 
@@ -100,8 +100,8 @@ public class UnzipServiceImpl implements UnzipService, InitializingBean {
       } finally {
         ImporterActionExecuter.deleteDir(tempDir);
       }
-    } catch (IOException ioErr) {
-      throw new AlfrescoRuntimeException("Failed to import ZIP file.", ioErr);
+    } catch (Exception ex) {
+      throw new AlfrescoRuntimeException("Failed to import ZIP file.", ex);
     } finally {
       // now the import is done, delete the temporary file
       if (tempFile != null) {
@@ -190,8 +190,14 @@ public class UnzipServiceImpl implements UnzipService, InitializingBean {
    * @return
    */
   public String parseValidFileName(String fileName) {
-    fileName = fileName.trim();
-    return fileName;
+    String result = fileName.trim();
+    
+    // filename can't end with a d
+    if (StringUtils.endsWith(result, ".")) {
+      result = StringUtils.removeEnd(result, ".");
+    }
+    
+    return result;
   }
 
   public void setNodeService(NodeService nodeService) {
