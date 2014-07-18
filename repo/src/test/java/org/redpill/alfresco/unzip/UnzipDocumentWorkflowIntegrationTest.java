@@ -2,8 +2,10 @@ package org.redpill.alfresco.unzip;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -21,21 +23,20 @@ import org.alfresco.service.cmr.workflow.WorkflowDefinition;
 import org.alfresco.service.cmr.workflow.WorkflowPath;
 import org.alfresco.service.namespace.QName;
 import org.junit.Test;
-import org.redpill.alfresco.test.AbstractRepoIntegrationTest;
 import org.springframework.extensions.surf.util.I18NUtil;
 
-public class UnzipDocumentWorkflowIntegrationTest extends AbstractRepoIntegrationTest {
+public class UnzipDocumentWorkflowIntegrationTest extends AbstractUnzipIntegrationTest {
 
   private static final String PROCESS_DEFINITION_ID = "activiti$unzipDocument";
 
   private static SiteInfo site;
   private static String siteManagerUser;
   private static String siteConsumerUser;
-  
+
   @Override
   public void beforeClassSetup() {
     super.beforeClassSetup();
-    
+
     Locale locale = new Locale("sv");
     I18NUtil.setLocale(locale);
 
@@ -60,7 +61,7 @@ public class UnzipDocumentWorkflowIntegrationTest extends AbstractRepoIntegratio
     // Run the tests as this user
     _authenticationComponent.setCurrentUser(siteManagerUser);
   }
-  
+
   @Override
   public void afterClassSetup() {
     _authenticationComponent.setCurrentUser(AuthenticationUtil.getAdminUserName());
@@ -90,13 +91,12 @@ public class UnzipDocumentWorkflowIntegrationTest extends AbstractRepoIntegratio
   }
 
   @Test
-  public void testStartSuccess() throws InterruptedException {
+  public void testStartSuccess() throws InterruptedException, FileNotFoundException {
+    File file = createTestZipFile();
+
     String filename = "documents.zip";
 
-    List<String> folders = new ArrayList<String>();
-    // folders.add("subfolder1");
-    // folders.add("subfolder2");
-    FileInfo zipFile = uploadDocument(site, filename, folders);
+    FileInfo zipFile = uploadDocument(site, filename, new FileInputStream(file));
 
     NodeRef workflowPackage = _workflowService.createPackage(null);
 
@@ -117,7 +117,7 @@ public class UnzipDocumentWorkflowIntegrationTest extends AbstractRepoIntegratio
 
     List<AssociationRef> list = _nodeService.getSourceAssocs(zipFile.getNodeRef(), UnzipModel.ASSOC_ZIP_DOCUMENT);
 
-    assertEquals(5, list.size());
+    assertEquals(6, list.size());
   }
 
   @Test

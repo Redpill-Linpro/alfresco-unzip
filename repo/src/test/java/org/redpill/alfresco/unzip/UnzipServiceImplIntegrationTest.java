@@ -1,5 +1,7 @@
 package org.redpill.alfresco.unzip;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.List;
 
 import org.alfresco.model.ContentModel;
@@ -11,11 +13,10 @@ import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
 import org.junit.Assert;
 import org.junit.Test;
-import org.redpill.alfresco.test.AbstractRepoIntegrationTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-public class UnzipServiceImplIntegrationTest extends AbstractRepoIntegrationTest {
+public class UnzipServiceImplIntegrationTest extends AbstractUnzipIntegrationTest {
 
   private static final String ADMIN_USER_NAME = "admin";
 
@@ -33,9 +34,11 @@ public class UnzipServiceImplIntegrationTest extends AbstractRepoIntegrationTest
         SiteInfo site = createSite("site-dashboard");
 
         try {
+          File file = createTestZipFile();
+          
           String filename = "documents.zip";
 
-          FileInfo zipFile = uploadDocument(site, filename);
+          FileInfo zipFile = uploadDocument(site, filename, new FileInputStream(file));
 
           NodeRef documentLibrary = _siteService.getContainer(site.getShortName(), SiteService.DOCUMENT_LIBRARY);
 
@@ -56,7 +59,7 @@ public class UnzipServiceImplIntegrationTest extends AbstractRepoIntegrationTest
           Assert.assertNotNull(file1);
           Assert.assertNotNull(file2);
           Assert.assertNotNull(folder1);
-          Assert.assertEquals(5, result.size());
+          Assert.assertEquals("Number of unzipped files differ from the expected result", 6, result.size());
         } finally {
           deleteSite(site);
         }
