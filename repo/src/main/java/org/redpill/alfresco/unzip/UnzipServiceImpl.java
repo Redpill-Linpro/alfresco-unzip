@@ -192,11 +192,21 @@ public class UnzipServiceImpl implements UnzipService, InitializingBean {
   public String parseValidFileName(String fileName) {
     String result = fileName.trim();
     
-    // filename can't end with a d
+    // filename can't end with a dot
     if (StringUtils.endsWith(result, ".")) {
       result = StringUtils.removeEnd(result, ".");
     }
     
+    // filename can't have a " in it
+    if (result.indexOf("\"") >= 0) {
+      result = StringUtils.replace(result, "\"", " ");
+    }
+
+    // filename can't have a & in it
+    if (result.indexOf("&") >= 0) {
+      result = StringUtils.replace(result, "&", " ");
+    }
+
     return result;
   }
 

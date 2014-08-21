@@ -59,7 +59,7 @@ public class UnzipServiceImplIntegrationTest extends AbstractUnzipIntegrationTes
           Assert.assertNotNull(file1);
           Assert.assertNotNull(file2);
           Assert.assertNotNull(folder1);
-          Assert.assertEquals("Number of unzipped files differ from the expected result", 6, result.size());
+          Assert.assertEquals("Number of unzipped files differ from the expected result", EXPECTED_NUMBER_OF_FILES, result.size());
         } finally {
           deleteSite(site);
         }

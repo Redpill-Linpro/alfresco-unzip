@@ -117,7 +117,7 @@ public class UnzipDocumentWorkflowIntegrationTest extends AbstractUnzipIntegrati
 
     List<AssociationRef> list = _nodeService.getSourceAssocs(zipFile.getNodeRef(), UnzipModel.ASSOC_ZIP_DOCUMENT);
 
-    assertEquals(6, list.size());
+    assertEquals("Number of unzipped files differ from the expected result", EXPECTED_NUMBER_OF_FILES, list.size());
   }
 
   @Test
