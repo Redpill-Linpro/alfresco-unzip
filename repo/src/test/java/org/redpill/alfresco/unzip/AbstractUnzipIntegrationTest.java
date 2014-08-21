@@ -15,6 +15,8 @@ import org.apache.commons.lang.StringUtils;
 import org.redpill.alfresco.test.AbstractRepoIntegrationTest;
 
 public abstract class AbstractUnzipIntegrationTest extends AbstractRepoIntegrationTest {
+  
+  public static final int EXPECTED_NUMBER_OF_FILES = 9;
 
   public File createTestZipFile() {
     return createTestZipFile(null);
@@ -42,6 +44,9 @@ public abstract class AbstractUnzipIntegrationTest extends AbstractRepoIntegrati
       addFileToZip("folder1/", logicalZip);
       addFileToZip("folder1/file3.txt", logicalZip);
       addFileToZip("file_ending_with_a_dot.", logicalZip);
+      addFileToZip("file+with+plus+in+it.txt", logicalZip);
+      addFileToZip("file\"qoute_in_it.txt", logicalZip);
+      addFileToZip("file_with_&_in_it.txt", logicalZip);
       // addFileToZip("1. Överenskommelser/5. Utskickade tåkar under 2013/608 Primärvården VGR PNV Tåk FM-kontor Lokalvård PV Mölnlycke barnmott, Mödrabarnhälsa i haga, Psykologi.pdf", logicalZip);
       
       logicalZip.finish();
