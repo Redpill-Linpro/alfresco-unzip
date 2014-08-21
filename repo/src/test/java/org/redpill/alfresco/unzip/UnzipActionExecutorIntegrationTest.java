@@ -4,13 +4,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.List;
 
+import org.alfresco.error.AlfrescoRuntimeException;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.model.FileInfo;
-import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.site.SiteInfo;
@@ -28,7 +28,7 @@ public class UnzipActionExecutorIntegrationTest extends AbstractUnzipIntegration
   @Qualifier("ActionService")
   protected ActionService _actionService;
 
-  @Test(expected = InvalidNodeRefException.class)
+  @Test(expected = AlfrescoRuntimeException.class)
   public void testFailed1() {
 
     AuthenticationUtil.runAs(new RunAsWork<Void>() {
@@ -60,7 +60,7 @@ public class UnzipActionExecutorIntegrationTest extends AbstractUnzipIntegration
 
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = AlfrescoRuntimeException.class)
   public void testFailed2() {
 
     AuthenticationUtil.runAs(new RunAsWork<Void>() {

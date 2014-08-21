@@ -162,7 +162,7 @@ public class UnzipServiceImpl implements UnzipService, InitializingBean {
           writer.putContent(contentStream);
         } else {
           // create a folder based on the folder name
-          FileInfo folderInfo = this._fileFolderService.create(root, fileName, ContentModel.TYPE_FOLDER);
+          FileInfo folderInfo = _fileFolderService.create(root, fileName, ContentModel.TYPE_FOLDER);
           
           NodeRef folderRef = folderInfo.getNodeRef();
 

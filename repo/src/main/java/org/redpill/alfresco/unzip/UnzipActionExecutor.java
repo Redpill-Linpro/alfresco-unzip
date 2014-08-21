@@ -13,6 +13,9 @@ import org.alfresco.repo.action.executer.ActionExecuterAbstractBase;
 import org.alfresco.repo.action.executer.MailActionExecuter;
 import org.alfresco.repo.dictionary.RepositoryLocation;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.transaction.AlfrescoTransactionSupport;
+import org.alfresco.repo.transaction.TransactionListener;
+import org.alfresco.repo.transaction.TransactionListenerAdapter;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.action.ParameterDefinition;
@@ -53,6 +56,14 @@ public class UnzipActionExecutor extends ActionExecuterAbstractBase implements I
 
   private static final String MSG_EMAIL_SUBJECT = "unzip.email.subject";
 
+  private static final String ACTIONED_UPON_NODE_REF = UnzipActionExecutor.class.getName() + "_ACTIONED_UPON_NODE_REF";
+
+  private static final String TARGET_NODE_REF = UnzipActionExecutor.class.getName() + "_TARGET_NODE_REF";
+
+  private static final String UNZIPPED_DOCUMENTS = UnzipActionExecutor.class.getName() + "_UNZIPPED_DOCUMENTS";
+
+  private static final String ERROR_MESSAGE = UnzipActionExecutor.class.getName() + "_ERROR_MESSAGE";
+
   private NodeService _nodeService;
 
   private UnzipService _unzipService;
@@ -75,6 +86,8 @@ public class UnzipActionExecutor extends ActionExecuterAbstractBase implements I
 
   private TransactionService _transactionService;
 
+  private TransactionListener _transactionListener;
+
   @Override
   protected void executeImpl(Action action, NodeRef actionedUponNodeRef) {
     if (LOG.isTraceEnabled()) {
@@ -87,6 +100,10 @@ public class UnzipActionExecutor extends ActionExecuterAbstractBase implements I
       LOG.trace("Source: " + actionedUponNodeRef + ", Target: " + targetNodeRef);
     }
 
+    AlfrescoTransactionSupport.bindResource(ACTIONED_UPON_NODE_REF, actionedUponNodeRef);
+    AlfrescoTransactionSupport.bindResource(TARGET_NODE_REF, targetNodeRef);
+    AlfrescoTransactionSupport.bindListener(_transactionListener);
+
     try {
       if (actionedUponNodeRef == null || !_nodeService.exists(actionedUponNodeRef)) {
         throw new AlfrescoRuntimeException(UNZIP_EXCEPTION_SOURCE_MESSAGE);
@@ -98,6 +115,8 @@ public class UnzipActionExecutor extends ActionExecuterAbstractBase implements I
 
       List<NodeRef> unzippedDocuments = _unzipService.importZip(actionedUponNodeRef, targetNodeRef);
 
+      AlfrescoTransactionSupport.bindResource(UNZIPPED_DOCUMENTS, unzippedDocuments);
+
       for (NodeRef unzippedDocument : unzippedDocuments) {
         _nodeService.addAspect(unzippedDocument, UnzipModel.ASPECT_UNZIPPED_FROM, null);
 
@@ -105,8 +124,6 @@ public class UnzipActionExecutor extends ActionExecuterAbstractBase implements I
       }
 
       action.setParameterValue(PARAM_RESULT, (Serializable) unzippedDocuments);
-
-      sendEmail(actionedUponNodeRef, targetNodeRef, unzippedDocuments, getSuccessEmailTemplateRef(), null);
     } catch (Exception ex) {
       String errorMessage = ex.getMessage();
 
@@ -116,13 +133,13 @@ public class UnzipActionExecutor extends ActionExecuterAbstractBase implements I
         }
       }
 
-      sendEmail(actionedUponNodeRef, targetNodeRef, null, getFailureEmailTemplateRef(), errorMessage);
+      AlfrescoTransactionSupport.bindResource(ERROR_MESSAGE, errorMessage);
 
       throw new AlfrescoRuntimeException(ex.getMessage(), ex);
     }
   }
 
-  private void sendEmail(final NodeRef zipFileNodeRef, final NodeRef folderNodeRef, final List<NodeRef> unzippedDocuments, final NodeRef emailTemplate, final String errorMessage) {
+  protected void sendEmail(final NodeRef zipFileNodeRef, final NodeRef folderNodeRef, final List<NodeRef> unzippedDocuments, final NodeRef emailTemplate, final String errorMessage) {
     Map<String, Object> model = new HashMap<String, Object>();
 
     if (unzippedDocuments != null) {
@@ -176,6 +193,10 @@ public class UnzipActionExecutor extends ActionExecuterAbstractBase implements I
     mailAction.setParameterValue(MailActionExecuter.PARAM_TEMPLATE_MODEL, (Serializable) model);
 
     _actionService.executeAction(mailAction, null);
+    
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Unzip email sent!");
+    }
   }
 
   private String getFolderPath(final NodeRef zipFileNodeRef) {
@@ -300,6 +321,38 @@ public class UnzipActionExecutor extends ActionExecuterAbstractBase implements I
     ParameterCheck.mandatory("fileFolderService", _fileFolderService);
     ParameterCheck.mandatory("repoAdminService", _repoAdminService);
     ParameterCheck.mandatory("transactionService", _transactionService);
+
+    _transactionListener = new SendMailTransactionListener();
+  }
+
+  private class SendMailTransactionListener extends TransactionListenerAdapter {
+
+    @Override
+    public void afterCommit() {
+      NodeRef actionedUponNodeRef = AlfrescoTransactionSupport.getResource(ACTIONED_UPON_NODE_REF);
+      NodeRef targetNodeRef = AlfrescoTransactionSupport.getResource(TARGET_NODE_REF);
+      List<NodeRef> unzippedDocuments = AlfrescoTransactionSupport.getResource(UNZIPPED_DOCUMENTS);
+
+      if (actionedUponNodeRef == null || targetNodeRef == null || !_nodeService.exists(actionedUponNodeRef) || !_nodeService.exists(targetNodeRef)) {
+        return;
+      }
+
+      sendEmail(actionedUponNodeRef, targetNodeRef, unzippedDocuments, getSuccessEmailTemplateRef(), null);
+    }
+
+    @Override
+    public void afterRollback() {
+      NodeRef actionedUponNodeRef = AlfrescoTransactionSupport.getResource(ACTIONED_UPON_NODE_REF);
+      NodeRef targetNodeRef = AlfrescoTransactionSupport.getResource(TARGET_NODE_REF);
+      String errorMessage = AlfrescoTransactionSupport.getResource(ERROR_MESSAGE);
+
+      if (actionedUponNodeRef == null || targetNodeRef == null || !_nodeService.exists(actionedUponNodeRef) || !_nodeService.exists(targetNodeRef)) {
+        return;
+      }
+
+      sendEmail(actionedUponNodeRef, targetNodeRef, null, getFailureEmailTemplateRef(), errorMessage);
+    }
+
   }
 
 }
