@@ -207,6 +207,36 @@ public class UnzipServiceImpl implements UnzipService, InitializingBean {
       result = StringUtils.replace(result, "&", " ");
     }
 
+    // filename can't have a @ in it
+    if (result.indexOf("@") >= 0) {
+      result = StringUtils.replace(result, "@", " ");
+    }
+
+    // filename can't have a ' in it
+    if (result.indexOf("'") >= 0) {
+      result = StringUtils.replace(result, "'", " ");
+    }
+
+    // filename can't have a ´ in it
+    if (result.indexOf("´") >= 0) {
+      result = StringUtils.replace(result, "´", " ");
+    }
+
+    // filename can't have a ¨ in it
+    if (result.indexOf("¨") >= 0) {
+      result = StringUtils.replace(result, "¨", " ");
+    }
+
+    // filename can't have a [ in it
+    if (result.indexOf("[") >= 0) {
+      result = StringUtils.replace(result, "[", " ");
+    }
+
+    // filename can't have a ] in it
+    if (result.indexOf("]") >= 0) {
+      result = StringUtils.replace(result, "]", " ");
+    }
+
     return result;
   }
 
