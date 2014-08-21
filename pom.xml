@@ -12,7 +12,7 @@
 
   <groupId>org.redpill-linpro.alfresco</groupId>
   <artifactId>alfresco-unzip</artifactId>
-  <version>1.0.5</version>
+  <version>1.0.6</version>
   <name>Base project for Alfresco Unzip Module</name>
   <description>Base project for Alfresco Unzip Module</description>
   <packaging>pom</packaging>
