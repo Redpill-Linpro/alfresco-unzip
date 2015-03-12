@@ -43,7 +43,7 @@
             var fnShowLoadingMessage = function() {
                loadingMessage = Alfresco.util.PopupManager.displayMessage({
                   displayTime : 0,
-                  text : '<span class="wait">' + $html(this.msg("message.loading")) + '</span>',
+                  text : '<span class="wait">' + $html(Alfresco.util.message("message.loading")) + '</span>',
                   noEscape : true
                });
             };
