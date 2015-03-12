@@ -14,6 +14,7 @@ import org.alfresco.repo.action.executer.MailActionExecuter;
 import org.alfresco.repo.dictionary.RepositoryLocation;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.transaction.AlfrescoTransactionSupport;
+import org.alfresco.repo.transaction.RetryingTransactionHelper.RetryingTransactionCallback;
 import org.alfresco.repo.transaction.TransactionListener;
 import org.alfresco.repo.transaction.TransactionListenerAdapter;
 import org.alfresco.service.cmr.action.Action;
@@ -329,15 +330,23 @@ public class UnzipActionExecutor extends ActionExecuterAbstractBase implements I
 
     @Override
     public void afterCommit() {
-      NodeRef actionedUponNodeRef = AlfrescoTransactionSupport.getResource(ACTIONED_UPON_NODE_REF);
-      NodeRef targetNodeRef = AlfrescoTransactionSupport.getResource(TARGET_NODE_REF);
-      List<NodeRef> unzippedDocuments = AlfrescoTransactionSupport.getResource(UNZIPPED_DOCUMENTS);
+      final NodeRef actionedUponNodeRef = AlfrescoTransactionSupport.getResource(ACTIONED_UPON_NODE_REF);
+      final NodeRef targetNodeRef = AlfrescoTransactionSupport.getResource(TARGET_NODE_REF);
+      final List<NodeRef> unzippedDocuments = AlfrescoTransactionSupport.getResource(UNZIPPED_DOCUMENTS);
 
       if (actionedUponNodeRef == null || targetNodeRef == null || !_nodeService.exists(actionedUponNodeRef) || !_nodeService.exists(targetNodeRef)) {
         return;
       }
+      _transactionService.getRetryingTransactionHelper().doInTransaction(new RetryingTransactionCallback<Void>() {
 
-      sendEmail(actionedUponNodeRef, targetNodeRef, unzippedDocuments, getSuccessEmailTemplateRef(), null);
+        @Override
+        public Void execute() throws Throwable {
+          sendEmail(actionedUponNodeRef, targetNodeRef, unzippedDocuments, getSuccessEmailTemplateRef(), null);
+          return null;
+        }
+        
+      });
+      
     }
 
     @Override

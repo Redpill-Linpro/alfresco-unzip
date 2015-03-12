@@ -14,7 +14,7 @@ public abstract class AbstractUnzipFunctionalTest extends AbstractRepoFunctional
     RestAssured.responseContentType(ContentType.JSON);
     
     given()
-      .baseUri(BASE_URI)
+      .baseUri(DEFAULT_BASE_URI)
       .pathParameter("source", zipFileNodeRef)
       .pathParameter("target", documentLibraryNodeRef)
       .pathParameter("async", async ? "true" : "false")
