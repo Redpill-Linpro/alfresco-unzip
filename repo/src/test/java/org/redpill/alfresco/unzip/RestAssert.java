@@ -26,7 +26,7 @@ public class RestAssert {
     RestAssured.responseContentType(ContentType.JSON);
 
     Response response = given()
-        .baseUri(AbstractRepoFunctionalTest.BASE_URI)
+        .baseUri(AbstractRepoFunctionalTest.DEFAULT_BASE_URI)
         .expect().statusCode(200)
         .when().get("/api/metadata?nodeRef=" + nodeRef);
     
@@ -49,7 +49,7 @@ public class RestAssert {
     String uri = "/slingshot/doclib/doclist/{type}/node/{store_type}/{store_id}/{id}";
 
     Response response = given()
-        .baseUri(AbstractRepoFunctionalTest.BASE_URI)
+        .baseUri(AbstractRepoFunctionalTest.DEFAULT_BASE_URI)
         .pathParameter("type", "all")
         .pathParameter("store_type", storeType)
         .pathParameter("store_id", storeId)
