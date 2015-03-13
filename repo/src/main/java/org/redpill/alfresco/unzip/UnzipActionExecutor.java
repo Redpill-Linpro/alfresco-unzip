@@ -55,6 +55,8 @@ public class UnzipActionExecutor extends ActionExecuterAbstractBase implements I
 
   private static final String UNZIP_EXCEPTION_TARGET_MESSAGE = "unzip.exception.target";
 
+  private static final String UNZIP_EXCEPTION_NOFILES_MESSAGE = "unzip.exception.nofiles";
+
   private static final String MSG_EMAIL_SUBJECT = "unzip.email.subject";
 
   private static final String ACTIONED_UPON_NODE_REF = UnzipActionExecutor.class.getName() + "_ACTIONED_UPON_NODE_REF";
@@ -115,7 +117,9 @@ public class UnzipActionExecutor extends ActionExecuterAbstractBase implements I
       }
 
       List<NodeRef> unzippedDocuments = _unzipService.importZip(actionedUponNodeRef, targetNodeRef);
-
+      if (unzippedDocuments == null) {
+        throw new AlfrescoRuntimeException(UNZIP_EXCEPTION_NOFILES_MESSAGE);
+      }
       AlfrescoTransactionSupport.bindResource(UNZIPPED_DOCUMENTS, unzippedDocuments);
 
       for (NodeRef unzippedDocument : unzippedDocuments) {
@@ -129,14 +133,20 @@ public class UnzipActionExecutor extends ActionExecuterAbstractBase implements I
       String errorMessage = ex.getMessage();
 
       if (ex instanceof AlfrescoRuntimeException) {
-        if (((AlfrescoRuntimeException) ex).getCause() instanceof FileExistsException) {
-          errorMessage = I18NUtil.getMessage("unzip.exception.target.alreadyExists");
-        }
+        Throwable cause = ex.getCause();
+        //Loop to find out if its a nested already exists error
+        while (cause != null) {
+          if (((AlfrescoRuntimeException) cause).getCause() instanceof FileExistsException) {
+            errorMessage = I18NUtil.getMessage("unzip.exception.target.alreadyExists");
+            break;
+          }
+          cause = ex.getCause();
+        }        
       }
 
       AlfrescoTransactionSupport.bindResource(ERROR_MESSAGE, errorMessage);
 
-      throw new AlfrescoRuntimeException(ex.getMessage(), ex);
+      throw new AlfrescoRuntimeException(errorMessage, ex);
     }
   }
 
@@ -194,7 +204,7 @@ public class UnzipActionExecutor extends ActionExecuterAbstractBase implements I
     mailAction.setParameterValue(MailActionExecuter.PARAM_TEMPLATE_MODEL, (Serializable) model);
 
     _actionService.executeAction(mailAction, null);
-    
+
     if (LOG.isDebugEnabled()) {
       LOG.debug("Unzip email sent!");
     }
@@ -344,22 +354,29 @@ public class UnzipActionExecutor extends ActionExecuterAbstractBase implements I
           sendEmail(actionedUponNodeRef, targetNodeRef, unzippedDocuments, getSuccessEmailTemplateRef(), null);
           return null;
         }
-        
+
       });
-      
+
     }
 
     @Override
     public void afterRollback() {
-      NodeRef actionedUponNodeRef = AlfrescoTransactionSupport.getResource(ACTIONED_UPON_NODE_REF);
-      NodeRef targetNodeRef = AlfrescoTransactionSupport.getResource(TARGET_NODE_REF);
-      String errorMessage = AlfrescoTransactionSupport.getResource(ERROR_MESSAGE);
+      final NodeRef actionedUponNodeRef = AlfrescoTransactionSupport.getResource(ACTIONED_UPON_NODE_REF);
+      final NodeRef targetNodeRef = AlfrescoTransactionSupport.getResource(TARGET_NODE_REF);
+      final String errorMessage = AlfrescoTransactionSupport.getResource(ERROR_MESSAGE);
 
       if (actionedUponNodeRef == null || targetNodeRef == null || !_nodeService.exists(actionedUponNodeRef) || !_nodeService.exists(targetNodeRef)) {
         return;
       }
+      _transactionService.getRetryingTransactionHelper().doInTransaction(new RetryingTransactionCallback<Void>() {
 
-      sendEmail(actionedUponNodeRef, targetNodeRef, null, getFailureEmailTemplateRef(), errorMessage);
+        @Override
+        public Void execute() throws Throwable {
+          sendEmail(actionedUponNodeRef, targetNodeRef, null, getFailureEmailTemplateRef(), errorMessage);
+          return null;
+        }
+
+      });
     }
 
   }
