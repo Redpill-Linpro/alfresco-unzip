@@ -26,6 +26,7 @@
       <property name="mimetypes">
          <list>
             <value>application/zip</value>
+            <value>application/x-zip-compressed</value>
          </list>
       </property>
    </bean>
