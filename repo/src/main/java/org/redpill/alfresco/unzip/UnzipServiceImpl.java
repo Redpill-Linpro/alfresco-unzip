@@ -40,6 +40,8 @@ public class UnzipServiceImpl implements UnzipService, InitializingBean {
   private static final String TEMP_FILE_SUFFIX_ZIP = ".zip";
 
   private static final String DEFAULT_ENCODING = "UTF-8";
+  
+  private static final String MIMETYPE_X_ZIP_COMPRESSED = "application/x-zip-compressed";
 
   private String _encoding = DEFAULT_ENCODING;
 
@@ -64,7 +66,8 @@ public class UnzipServiceImpl implements UnzipService, InitializingBean {
       return null;
     }
 
-    if (!MimetypeMap.MIMETYPE_ZIP.equals(reader.getMimetype())) {
+    
+    if (!MimetypeMap.MIMETYPE_ZIP.equals(reader.getMimetype()) && !MIMETYPE_X_ZIP_COMPRESSED.equals(reader.getMimetype())) {
       return null;
     }
 
