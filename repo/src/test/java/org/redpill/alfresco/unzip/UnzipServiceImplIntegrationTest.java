@@ -35,7 +35,7 @@ public class UnzipServiceImplIntegrationTest extends AbstractUnzipIntegrationTes
 
         try {
           File file = createTestZipFile();
-          
+
           String filename = "documents.zip";
 
           FileInfo zipFile = uploadDocument(site, filename, new FileInputStream(file));
@@ -43,7 +43,7 @@ public class UnzipServiceImplIntegrationTest extends AbstractUnzipIntegrationTes
           NodeRef documentLibrary = _siteService.getContainer(site.getShortName(), SiteService.DOCUMENT_LIBRARY);
 
           List<NodeRef> result = _unzipService.importZip(zipFile.getNodeRef(), documentLibrary);
-          
+
           NodeRef zipFileNodeRef = _nodeService.getChildByName(documentLibrary, ContentModel.ASSOC_CONTAINS, filename);
           NodeRef file1 = _nodeService.getChildByName(documentLibrary, ContentModel.ASSOC_CONTAINS, "file1.txt");
           NodeRef file2 = _nodeService.getChildByName(documentLibrary, ContentModel.ASSOC_CONTAINS, "file2.txt");

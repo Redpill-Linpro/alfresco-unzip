@@ -1,7 +1,6 @@
 package org.redpill.alfresco.unzip;
 
-import static com.jayway.restassured.RestAssured.*;
-import static org.redpill.alfresco.unzip.RestAssert.*;
+import static com.jayway.restassured.RestAssured.preemptive;
 
 import java.io.IOException;
 

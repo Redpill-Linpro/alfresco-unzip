@@ -30,16 +30,17 @@ public class UnzipActionExecutorIntegrationTest extends AbstractUnzipIntegration
 
   @Test(expected = AlfrescoRuntimeException.class)
   public void testFailed1() {
-
     AuthenticationUtil.runAs(new RunAsWork<Void>() {
 
       @Override
       public Void doWork() throws Exception {
-        SiteInfo site = createSite("site-dashboard");
+        SiteInfo site = null;
 
         try {
+          site = createSite();
+
           File file = createTestZipFile();
-          
+
           String filename = "documents.zip";
 
           FileInfo zipFile = uploadDocument(site, filename, new FileInputStream(file));
@@ -50,26 +51,28 @@ public class UnzipActionExecutorIntegrationTest extends AbstractUnzipIntegration
 
           _actionService.executeAction(action, zipFile.getNodeRef());
         } finally {
-          deleteSite(site);
+          if (site != null) {
+            deleteSite(site);
+          }
         }
 
         return null;
       }
 
     }, ADMIN_USER_NAME);
-
   }
 
   @Test(expected = AlfrescoRuntimeException.class)
   public void testFailed2() {
-
     AuthenticationUtil.runAs(new RunAsWork<Void>() {
 
       @Override
       public Void doWork() throws Exception {
-        SiteInfo site = createSite("site-dashboard");
+        SiteInfo site = null;
 
         try {
+          site = createSite();
+
           NodeRef documentLibrary = _siteService.getContainer(site.getShortName(), SiteService.DOCUMENT_LIBRARY);
 
           Action action = _actionService.createAction("unzip");
@@ -78,28 +81,32 @@ public class UnzipActionExecutorIntegrationTest extends AbstractUnzipIntegration
 
           _actionService.executeAction(action, null);
         } finally {
-          deleteSite(site);
+          if (site != null) {
+            deleteSite(site);
+          }
         }
 
         return null;
       }
 
     }, ADMIN_USER_NAME);
-
   }
 
   @Test
   public void testSuccess() {
+    setRequiresNew(false);
 
     AuthenticationUtil.runAs(new RunAsWork<Void>() {
 
       @Override
       public Void doWork() throws Exception {
-        SiteInfo site = createSite("site-dashboard");
+        SiteInfo site = null;
 
         try {
+          site = createSite();
+
           File file = createTestZipFile();
-          
+
           String filename = "documents.zip";
 
           FileInfo zipFile = uploadDocument(site, filename, new FileInputStream(file));
@@ -117,7 +124,7 @@ public class UnzipActionExecutorIntegrationTest extends AbstractUnzipIntegration
             Thread.sleep(1000);
             System.out.println("Sleeping . . . (" + action.getExecutionStatus() + ")");
           }
-          
+
           @SuppressWarnings("unchecked")
           List<NodeRef> result = (List<NodeRef>) action.getParameterValue(UnzipActionExecutor.PARAM_RESULT);
 
@@ -138,7 +145,9 @@ public class UnzipActionExecutorIntegrationTest extends AbstractUnzipIntegration
           Assert.assertNotNull(folder1);
           Assert.assertEquals("Number of unzipped files differ from the expected result", EXPECTED_NUMBER_OF_FILES, result.size());
         } finally {
-          deleteSite(site);
+          if (site != null) {
+            deleteSite(site);
+          }
         }
 
         return null;

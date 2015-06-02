@@ -64,6 +64,8 @@ public class UnzipDocumentWorkflowIntegrationTest extends AbstractUnzipIntegrati
 
   @Override
   public void afterClassSetup() {
+    super.afterClassSetup();
+    
     _authenticationComponent.setCurrentUser(AuthenticationUtil.getAdminUserName());
 
     deleteSite(site);
@@ -122,6 +124,8 @@ public class UnzipDocumentWorkflowIntegrationTest extends AbstractUnzipIntegrati
 
   @Test
   public void testStartFailure() throws InterruptedException {
+    setRequiresNew(false);
+
     String filename = "broken_documents.zip";
 
     FileInfo zipFile = uploadDocument(site, filename);
